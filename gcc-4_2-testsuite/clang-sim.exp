@@ -1,0 +1,377 @@
+# Copyright (C) 2005 Free Software Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+
+#*****************
+# See: "DejaGnu: The GNU Testing Framework", section: Extending DejaGnu
+# for more information.
+#
+# NOTE: search for trunk/buildscript/boards/bfin-elf.exp on uclinux.org
+# for examples of a lot of variables that can be set (and other BSPs).
+#*****************
+
+set SIM "qemu-system-lm32"
+set SIMLOGFILE "/tmp/simoutput.log"
+set_board_info sim,options "-M lm32-evr -nographic -device lm32-sys -net none -kernel"
+
+# The pid of the simulator when testing GDB
+set simpid 0
+
+# This is a list of toolchains that are supported on this board.
+set_board_info target_install {monarch-usc-elf monarch-usc-rtems}
+
+# FIXME:this bit will be wrong
+set_board_info gdb_protocol "remote"
+set_board_info netport tcp:localhost:1234
+set_board_info gdb,start_symbol "_start"
+
+
+if { ${tool} == "gdb" } {
+
+set_board_info gdb_run_command "jump *_start"
+#set_board_info gdb_init_command "tbreak main"
+
+    load_lib gdb.exp
+# We need to override mi_gdb_start, so we load the default from
+# mi-support.exp and then override it below.
+    load_lib mi-support.exp
+
+## derived from sid.exp
+#
+# Handle GDB talking to SID
+#
+
+proc sim_start {} {
+    global verbose
+    global simpid
+    global SIM
+    global SIMLOGFILE
+
+    verbose "MONARCH: monarch-sim.exp: sim_start: " 2
+
+    if { $simpid != 0 } {
+        verbose "MONARCH: monarch-sim.exp: sim_start: kill process $simpid" 2
+        catch { exec kill -TERM $simpid }
+	set simpid 0
+        sleep 1
+    }
+
+    verbose "MONARCH: monarch-sim.exp exec $SIM --debug=2159  --persist >&$SIMLOGFILE & " 2
+    set simpid [exec $SIM --debug=2159  --persist >&$SIMLOGFILE &]
+
+    # The sleep is necessary to allow the simualtor to start up and
+    # start listening on the GDB port. Without it a "Couldn't attach to 
+    # target" error occurs.  
+    sleep 4
+
+    verbose "MONARCH: monarch-sim.exp: sim_start: simulator started as pid ${simpid}" 2
+}
+
+proc gdb_start {} {
+    sim_start
+    return [default_gdb_start]
+}
+
+###
+### Do we need to override mi_gdb_exit?
+###
+proc mi_gdb_start { args } {
+  sim_start
+  return [default_mi_gdb_start $args]
+}
+
+proc sim_exit {} {
+    global simpid
+    if { $simpid != 0 } {
+        verbose "MONARCH: monarch-sim.exp: sim_exit: kill process $simpid" 2
+        catch { exec kill -TERM $simpid }
+	set simpid 0
+    }
+
+}       
+        
+proc gdb_exit {} {
+    set result [default_gdb_exit]
+    sim_exit
+    return $result
+}           
+
+#
+# Handle GDB talking to MONARCH siulator
+#
+#
+# Set gdb to target the simulator
+#
+proc send_target_sim { } {
+    # wait a little while, giving simulator time to shut down & restart its
+    # gdb socket
+    verbose "MONARCH: monarch-sim.exp: target [target_info gdb_protocol] [target_info netport]\n" 2
+    sleep 4
+    send_gdb "target [target_info gdb_protocol] [target_info netport]\n"
+}
+
+proc gdb_target_sim { } {
+    global gdb_prompt
+    global exit_status
+    global SIMLOGFILE
+
+    verbose "Monarch simulator logfile is: $SIMLOGFILE"
+
+    send_target_sim
+
+    global timeout
+    set prev_timeout $timeout
+    set timeout 60
+    verbose "MONARCH: monarch-sim.exp: Timeout is now $timeout seconds" 2
+    gdb_expect {
+        -re ".*\[Ee\]rror.*$gdb_prompt $" {
+            perror "MONARCH: monarch-sim.exp: Couldn't set target for remote simulator (no gdb prompt). Check simulator's $SIMLOGFILE file for error messages."
+            cleanup
+            gdb_exit
+        }
+        -re "Remote debugging using.*$gdb_prompt"       {
+            verbose "Monarch target successfully set."
+        }
+        timeout {
+            perror "MONARCH: monarch-sim.exp: Couldn't set target for remote simulator (timeout). Check simulator's $SIMLOGFILE file for error messages."
+            cleanup
+            gdb_exit
+        }
+    }
+    set timeout $prev_timeout
+    verbose "MONARCH: monarch-sim.exp: Timeout is now $timeout seconds" 2
+}
+
+#
+# gdb_load -- load a file into the debugger.
+#             return a -1 if anything goes wrong.
+#
+proc gdb_load { arg } {
+    global verbose
+    global loadpath
+    global loadfile
+    global GDB
+    global gdb_prompt
+    global retval
+
+    if { $arg != "" } {
+        if [gdb_file_cmd $arg] then { return -1 }
+    }
+
+    gdb_target_sim
+
+    send_gdb "load\n"
+    global timeout
+    set prev_timeout $timeout
+    set timeout 200
+    verbose "MONARCH: monarch-sim.exp: Timeout is now $timeout seconds" 2
+    gdb_expect {
+        -re ".*\[Ee\]rror.*$gdb_prompt $" {
+            if $verbose>1 then {
+                perror "monarch-sim.exp: Error during download."
+            }
+            set retval -1;
+        }
+        -re ".*$gdb_prompt $" {
+            if $verbose>1 then {
+                send_user "Loaded $arg into $GDB\n"
+            }
+            set retval 0;
+        }
+        -re "$gdb_prompt $"     {
+            if $verbose>1 then {
+                perror "monarch-sim.exp: GDB couldn't load."
+            }
+            set retval -1;
+        }
+        timeout {
+            if $verbose>1 then {
+                perror "monarch-sim.exp: Timed out trying to load $arg."
+            }
+            set retval -1;
+        }
+    }
+    set timeout $prev_timeout
+    verbose "MONARCH: monarch-sim.exp: Timeout is now $timeout seconds" 2
+    return $retval;
+}
+
+
+} else {
+    # Load the generic configuration for this board. This will define a basic
+    # set of routines used to communicate with the board.
+    load_generic_config "sim"
+
+    # basic-sim.exp is a basic description for the standard Cygnus simulator.
+    load_base_board_description "basic-sim"
+
+    setup_sim monarch
+
+    # can only run a process once per session
+    set_board_info gdb,do_reload_on_run 1
+}
+
+# The compiler used to build for this board. This has *nothing* to do
+# with what compiler is tested if we're testing gcc.
+#set_board_info compiler 	"[find_gcc]"
+#set_board_info compiler 	"mcc"
+
+# We require the full featured multilib, unsurprisingly
+#process_multilib_options ""
+
+# The basic set of flags needed to build "hello world" for this
+# board. This board uses newlib.
+#set_board_info cflags 	"[newlib_include_flags] -DMAX_ITER=1000"
+set_board_info cflags 	" -DMAX_ITER=1000"
+
+#set_board_info ldflags 	"[newlib_link_flags]"
+
+# Can't pass arguments to this target.
+set_board_info noargs 1
+
+# This looks like a remote board
+set_board_info isremote 1
+
+# don't do things like 'run', which don't work on a remote target.
+set_board_info use_gdb_stub 1
+
+# can't do IO. perhaps we can wedge _write to make an OXX packet appear
+set_board_info gdb,noinferiorio 1
+
+# signals are fatal
+set_board_info gdb,nosignals 1
+
+# no shared libaries
+set_board_info gdb,noshared 1
+
+# Simulator has insufficient memory
+set_board_info gdb,skip_huge_test 1
+
+# We have no watchpoints
+set_board_info gdb,no_watchpoints 1
+
+# no hardware wathpoints either (is this redundant?)
+set_board_info gdb,no_hardware_watchpoints 1
+
+# don't write tiny packets.
+set_board_info gdb,smallest_memory_write 50
+
+# and it can take a long time even then.
+set_board_info gdb,timeout 10
+
+# If the stack is too large, the tests tend to time out on the simulator.
+set_board_info gcc,stack_size 200
+
+# And the simulator is sloooow (is this still applicable?)
+set_board_info sim_time_limit 30
+
+
+#set_board_info compiler mcc
+#set_board_info c++compiler mcc
+set_board_info multitop ""
+set_board_info mathlib ""
+
+#load_base_board_description "unix"
+
+
+proc gcc_target_compile { source dest type options } {
+    global tmpdir
+    global gluefile wrap_flags
+    global GCC_UNDER_TEST
+    global TOOL_OPTIONS
+	
+    if {[target_info needs_status_wrapper] != "" && \
+	    [target_info needs_status_wrapper] != "0" && \
+	    [info exists gluefile] } {
+	lappend options "libs=${gluefile}"
+	lappend options "ldflags=$wrap_flags"
+    }
+
+    if [target_info exists gcc,stack_size] {
+	lappend options "additional_flags=-DSTACK_SIZE=[target_info gcc,stack_size]"
+    }
+    if [target_info exists gcc,no_trampolines] {
+	lappend options "additional_flags=-DNO_TRAMPOLINES"
+    }
+    if [target_info exists gcc,no_label_values] {
+	lappend options "additional_flags=-DNO_LABEL_VALUES"
+    }
+    # TOOL_OPTIONS must come first, so that it doesn't override testcase
+    # specific options.
+    if [info exists TOOL_OPTIONS] {
+	set options [concat "{additional_flags=$TOOL_OPTIONS}" $options]
+    }
+    if [target_info exists gcc,timeout] {
+	lappend options "timeout=[target_info gcc,timeout]"
+    }
+#    lappend options "additional_flags=-fno-show-column"
+    lappend options "compiler=$GCC_UNDER_TEST"
+    set options [dg-additional-files-options $options $source]
+    return [target_compile $source $dest $type $options]
+}
+
+proc default_gcc_version { } {
+    global GCC_UNDER_TEST
+
+verbose "In clang-sim.exp:default_gcc_version{} "
+
+    # ignore any arguments after the command
+    set compiler [lindex $GCC_UNDER_TEST 0]
+
+    if ![is_remote host] {
+	set compiler_name [which $compiler]
+    } else {
+	set compiler_name $compiler
+    }
+
+verbose "In clang-sim.exp:default_gcc_version{} compiler name ${compiler}"
+
+    # verify that the compiler exists
+    if { $compiler_name != 0 } then {
+	set tmp [remote_exec host "$compiler --version"]
+	set status [lindex $tmp 0]
+	set output [lindex $tmp 1]
+        clone_output "$compiler_name $output\n"
+verbose "In clang-sim.exp:default_gcc_version{} compiler version ${tmp}"
+    } else {
+	# compiler does not exist (this should have already been detected)
+	warning "$compiler does not exist"
+    }
+}
+
+
+
+#
+# for TORTURE_OPTIONS see:
+# gcc/gcc/testsuite/lib/c-torture.exp
+#
+global TORTURE_OPTIONS
+if ![info exists TORTURE_OPTIONS] {
+    # It is theoretically beneficial to group all of the O2/O3 options together,
+    # as in many cases the compiler will generate identical executables for
+    # all of them--and the c-torture testsuite will skip testing identical
+    # executables multiple times.
+    # Also note that -finline-functions is explicitly included in one of the
+    # items below, even though -O3 is also specified, because some ports may
+    # choose to disable inlining functions by default, even when optimizing.
+    set TORTURE_OPTIONS [list \
+        { -O0 } \
+        { -O1 } \
+        { -O2 } \
+        { -O3 } ]
+}   
