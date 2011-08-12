@@ -25,15 +25,21 @@
 # for examples of a lot of variables that can be set (and other BSPs).
 #*****************
 
+verbose "=====In clang-sim.exp:TOP "
+
 set SIM "qemu-system-lm32"
+set_board_info sim "qemu-wrapper"
 set SIMLOGFILE "/tmp/simoutput.log"
 set_board_info sim,options "-M lm32-evr -nographic -device lm32-sys -net none -kernel"
+
+set_board_info needs_status_wrapper 0
+
 
 # The pid of the simulator when testing GDB
 set simpid 0
 
 # This is a list of toolchains that are supported on this board.
-set_board_info target_install {monarch-usc-elf monarch-usc-rtems}
+set_board_info target_install {mico32-elf}
 
 # FIXME:this bit will be wrong
 set_board_info gdb_protocol "remote"
@@ -213,14 +219,16 @@ proc gdb_load { arg } {
 
 
 } else {
+verbose "=====In clang-sim.exp: tool!=gdb "
     # Load the generic configuration for this board. This will define a basic
     # set of routines used to communicate with the board.
     load_generic_config "sim"
 
+    # the following code would normally discover and "set_board_info sim"
+    # but we've already done that.
     # basic-sim.exp is a basic description for the standard Cygnus simulator.
-    load_base_board_description "basic-sim"
-
-    setup_sim monarch
+    #load_base_board_description "basic-sim"
+    #setup_sim lm32
 
     # can only run a process once per session
     set_board_info gdb,do_reload_on_run 1
@@ -295,6 +303,8 @@ proc gcc_target_compile { source dest type options } {
     global GCC_UNDER_TEST
     global TOOL_OPTIONS
 	
+verbose "=====In clang-sim.exp:gcc_target_compile{} "
+
     if {[target_info needs_status_wrapper] != "" && \
 	    [target_info needs_status_wrapper] != "0" && \
 	    [info exists gluefile] } {

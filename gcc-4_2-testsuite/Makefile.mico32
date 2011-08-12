@@ -29,8 +29,11 @@ COMPAT_OPTIONS := [list [list {-m64} {-m64}] [list {-m32} {-m32}]]
 #RUNTESTFLAGS:="execute.exp GCC_UNDER_TEST=mcc GCC=mcc TORTURE_OPTIONS=\"[ { -O0 } { -O1 } { -O3 } ]\" --target_board=clang-sim --strace 9 --debug -v -v -v -v -v -v -v -v -v -v -v "
 #RUNTESTFLAGS:="execute.exp GCC_UNDER_TEST=mcc GCC=mcc --target_board=clang-sim "
 #RUNTESTFLAGS:="execute.exp=980709-1.c GCC_UNDER_TEST=mcc GCC=mcc --target_board=clang-sim "
-RUNTESTFLAGS:="execute.exp --verbose --target_board=clang-sim "
-RUNTESTFLAGS:=execute.exp=switch-1.c --verbose --target_board=clang-sim --strace 9 --debug -v -v -v -v -v -v -v
+RUNTESTFLAGS:="--verbose --target_board=clang-sim "
+RUNTESTFLAGS:="--target_board=clang-sim "
+#RUNTESTFLAGS:=execute.exp=switch-1.c --verbose --target_board=clang-sim --strace 9 --debug -v -v -v -v -v -v -v
+#RUNTESTFLAGS:=execute.exp=20000121-1.c --verbose --target_board=clang-sim --strace 9 --debug -v -v -v -v -v -v -v
+RUNTESTFLAGS:=execute.exp --target_board=clang-sim 
 
 TESTSUITEDIR := src
 
@@ -94,6 +97,7 @@ libcrt.a:	crt.s
 	@cp crt.0 libcrt.a
 	
 check-%: obj/.dir obj/%/.dir site.exp libcrt.a
+	@hash qemu-wrapper 2>&- || { echo >&2 "ERROR: qemu-wrapper must be on the absolute PATH and executable. Aborting."; exit 1; }
 	@cp site.exp ${objdir}/$*
 	(cd ${objdir}/$* && \
 	 runtest --tool $* $(RUNTESTFLAGS))
