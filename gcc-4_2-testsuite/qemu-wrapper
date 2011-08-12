@@ -1,11 +1,43 @@
 #!/bin/sh
+set -o errexit
+set -o nounset
+
 SIM=qemu-system-lm32
 
-hash $SIM 2>&- || { echo >&2 "ERROR: qemu-wrapper is unable to find $SIM. Aborting."; exit 1; }
+function on_exit ()
+{
+    if [ -e $TMPFILE ] ; then
+	rm -rf $TMPFILE
+    fi
+}
+ 
+trap on_exit INT TERM EXIT
 
-if $SIM $* 2>&1 | grep -q "OK"
-then
-  exit 0
-else
+
+tempfoo=`basename $0`
+if ! TMPFILE=`mktemp -q /tmp/${tempfoo}.XXXXXX` ; then
+	echo "$0: Can't create temp file, exiting..."
+	exit 1
+fi
+
+if ! hash $SIM 2>&-  ; then
+	echo "$0: qemu-wrapper is unable to find $SIM, exiting..."
+	exit 1
+fi
+
+# Normally the SIM should not fail but if it does
+# generate detailed errors so we can run the test manually.
+if ! $SIM $* > $TMPFILE 2>&1 ; then
+	echo "$0: $SIM returned error"
+  	cat $TMPFILE
+	echo "command was: $SIM $*"
+	exit 1
+fi
+
+if ! grep -q "OK" $TMPFILE ; then
+  cat $TMPFILE
   exit 1
+else
+  cat $TMPFILE
+  exit 0
 fi

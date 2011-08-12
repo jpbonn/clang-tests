@@ -32,9 +32,6 @@ set_board_info sim "qemu-wrapper"
 set SIMLOGFILE "/tmp/simoutput.log"
 set_board_info sim,options "-M lm32-evr -nographic -device lm32-sys -net none -kernel"
 
-set_board_info needs_status_wrapper 0
-
-
 # The pid of the simulator when testing GDB
 set simpid 0
 
