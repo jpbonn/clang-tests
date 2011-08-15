@@ -36,7 +36,8 @@ set_board_info sim,options "-M lm32-evr -nographic -device lm32-sys -net none -k
 set simpid 0
 
 # This is a list of toolchains that are supported on this board.
-set_board_info target_install {mico32-elf}
+# I think this is only used for the test ".x" files (in our case).
+set_board_info target_install {mico32-rtems-elf}
 
 # FIXME:this bit will be wrong
 set_board_info gdb_protocol "remote"
@@ -292,45 +293,6 @@ set_board_info multitop ""
 set_board_info mathlib ""
 
 #load_base_board_description "unix"
-
-
-proc gcc_target_compile { source dest type options } {
-    global tmpdir
-    global gluefile wrap_flags
-    global GCC_UNDER_TEST
-    global TOOL_OPTIONS
-	
-verbose "=====In clang-sim.exp:gcc_target_compile{} "
-
-    if {[target_info needs_status_wrapper] != "" && \
-	    [target_info needs_status_wrapper] != "0" && \
-	    [info exists gluefile] } {
-	lappend options "libs=${gluefile}"
-	lappend options "ldflags=$wrap_flags"
-    }
-
-    if [target_info exists gcc,stack_size] {
-	lappend options "additional_flags=-DSTACK_SIZE=[target_info gcc,stack_size]"
-    }
-    if [target_info exists gcc,no_trampolines] {
-	lappend options "additional_flags=-DNO_TRAMPOLINES"
-    }
-    if [target_info exists gcc,no_label_values] {
-	lappend options "additional_flags=-DNO_LABEL_VALUES"
-    }
-    # TOOL_OPTIONS must come first, so that it doesn't override testcase
-    # specific options.
-    if [info exists TOOL_OPTIONS] {
-	set options [concat "{additional_flags=$TOOL_OPTIONS}" $options]
-    }
-    if [target_info exists gcc,timeout] {
-	lappend options "timeout=[target_info gcc,timeout]"
-    }
-#    lappend options "additional_flags=-fno-show-column"
-    lappend options "compiler=$GCC_UNDER_TEST"
-    set options [dg-additional-files-options $options $source]
-    return [target_compile $source $dest $type $options]
-}
 
 proc default_gcc_version { } {
     global GCC_UNDER_TEST

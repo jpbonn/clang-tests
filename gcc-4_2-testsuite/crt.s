@@ -88,7 +88,28 @@ _system_call_handler:
 .global _init
 _init:
 	start
+	/* Setup stack and global pointer */
+	mvhi    sp, hi(_fstack)
+	ori     sp, sp, lo(_fstack)
+	mvhi    gp, hi(_gp)
+	ori     gp, gp, lo(_gp)
+
+	/* Clear BSS */
+	mvhi    r1, hi(_fbss)
+	ori     r1, r1, lo(_fbss)
+	mvhi    r3, hi(_ebss)
+	ori     r3, r3, lo(_ebss)
+.clearBSS:
+	be      r1, r3, .callMain
+	sw      (r1+0), r0
+	addi    r1, r1, 4
+	bi      .clearBSS
+
+.callMain:
+
         test_name MAIN
+	mvi r1, 0
+	mvi r2, 0
 	calli main
 .global exit
 exit:

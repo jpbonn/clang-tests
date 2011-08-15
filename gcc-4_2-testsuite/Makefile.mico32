@@ -1,6 +1,6 @@
-host := mico32-elf
-build := mico32-elf
-target := mico32-elf
+host := mico32-bare-elf
+build := mico32-bare-elf
+target := mico32-bare-elf
 srcdir := $(shell pwd)/src
 objdir := $(shell pwd)/obj
 
@@ -11,7 +11,9 @@ CCC_ADD_ARGS := -ccc-clang-cxx,-Qunused-arguments,-std-default=gnu89,-ferror-lim
 # args we need:
 # /Users/jpbonn/Documents/mico32/install2/bin/clang -march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name /opt/rtems-4.11/bin/lm32-rtems4.11-gcc -Tlinker.ld -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -O0 -DSTACK_SIZE=200 -DMAX_ITER=1000 crt.o main.c -o main.tst
 
-CFLAGS_FOR_TARGET:=-march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name /opt/rtems-4.11/bin/lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt 
+CFLAGS_FOR_CRT:=-march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name /opt/rtems-4.11/bin/lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir)
+CFLAGS_FOR_TARGET:= $(CFLAGS_FOR_CRT) -lcrt
+
 LDFLAGS_FOR_TARGET:=-march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name /opt/rtems-4.11/bin/lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt
 
 CC_UNDER_TEST := /Users/jpbonn/Documents/mico32/install2/bin/clang
@@ -33,7 +35,7 @@ RUNTESTFLAGS:="--verbose --target_board=clang-sim "
 RUNTESTFLAGS:="--target_board=clang-sim "
 #RUNTESTFLAGS:=execute.exp=switch-1.c --verbose --target_board=clang-sim --strace 9 --debug -v -v -v -v -v -v -v
 #RUNTESTFLAGS:=execute.exp=20000121-1.c --verbose --target_board=clang-sim --strace 9 --debug -v -v -v -v -v -v -v
-RUNTESTFLAGS:=execute.exp --target_board=clang-sim 
+RUNTESTFLAGS:=execute.exp --target_board=clang-sim
 
 TESTSUITEDIR := src
 
@@ -93,8 +95,8 @@ save-results:
 	done
 
 libcrt.a:	crt.s
-	$(CC_UNDER_TEST) $(CFLAGS_FOR_TARGET) $< -c
-	@cp crt.0 libcrt.a
+	$(CC_UNDER_TEST) $(CFLAGS_FOR_CRT) $< -c
+	@cp crt.o libcrt.a
 	
 check-%: obj/.dir obj/%/.dir site.exp libcrt.a
 	@hash qemu-wrapper 2>&- || { echo >&2 "ERROR: qemu-wrapper must be on the absolute PATH and executable. Aborting."; exit 1; }
@@ -105,7 +107,7 @@ check-%: obj/.dir obj/%/.dir site.exp libcrt.a
 .PHONY: check-%
 
 clean:
-	rm -rf *.o obj site.exp site.bak
+	rm -rf *.o libcrt.a obj site.exp site.bak
 .PHONY: clean
 
 %/.dir:
