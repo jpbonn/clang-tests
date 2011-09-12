@@ -1,0 +1,2 @@
+
+make -f Makefile.mico32 check-gcc
