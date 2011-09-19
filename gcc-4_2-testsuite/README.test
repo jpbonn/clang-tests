@@ -1,2 +1,12 @@
 
+Install qemu from the source tree.
+See directions on the wiki:
+http://www.milkymist.org/wiki/index.php?title=Using_QEMU
+
+set the PATH to include qemu-wrapper (this directory).
+
+Install dejagnu:
+sudo apt-get install dejagnu
+
+
 make -f Makefile.mico32 check-gcc
