@@ -46,6 +46,8 @@ SECTIONS
 		*(.dynbss)
 		*(.bss .bss.* .gnu.linkonce.b.*)
 		*(COMMON)
+                /* The initialization code assumes the end of .bss is aligned. */
+                . = ALIGN(4);
 		_ebss = .;
 		_end = .;
 	} > ram
