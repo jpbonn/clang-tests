@@ -87,7 +87,6 @@ _system_call_handler:
 
 .global _init
 _init:
-	start
 	/* Setup stack and global pointer */
         /* Point to the first unused location so offset the stack by 4 */
 	mvhi    sp, hi(_fstack+4)

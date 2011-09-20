@@ -6,6 +6,8 @@ tn_\name:
 	.text
 	mvhi r13, hi(tn_\name)
 	ori r13, r13, lo(tn_\name)
+	mvhi r12, hi(0xffff0000)      # base address of test block
+	ori r12, r12, lo(0xffff0000)
 	sw (r12+8), r13
 .endm
 
@@ -16,11 +18,15 @@ tn_\name:
 
 .macro tc_pass
 	mvi r13, 0
+	mvhi r12, hi(0xffff0000)      # base address of test block
+	ori r12, r12, lo(0xffff0000)
 	sw (r12+4), r13
 .endm
 
 .macro tc_fail
 	mvi r13, 1
+	mvhi r12, hi(0xffff0000)      # base address of test block
+	ori r12, r12, lo(0xffff0000)
 	sw (r12+4), r13
 .endm
 
@@ -59,16 +65,10 @@ tn_\name:
 2:
 .endm
 
-.macro start
-	.global _main
-	.text
-_main:
+.macro end
 	mvhi r12, hi(0xffff0000)      # base address of test block
 	ori r12, r12, lo(0xffff0000)
-.endm
-
-.macro end
-	sw (r12+0), r0
+	sw (r12+0), r0                # stop qemu
 1:
 	bi 1b
 .endm
