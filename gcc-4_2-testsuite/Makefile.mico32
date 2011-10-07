@@ -6,18 +6,18 @@ objdir := $(shell pwd)/obj
 
 board_dir := $(shell pwd)
 
-CCC_ADD_ARGS := -ccc-clang-cxx,-Qunused-arguments,-std-default=gnu89,-ferror-limit=0,-fmessage-length=0,-fno-color-diagnostics,-fno-caret-diagnostics,-Wno-unused-value,-Wno-return-type,-Wno-constant-logical-operand,-fno-verbose-asm,-march=mico32,-ccc-host-triple mico32-elf,-ccc-gcc-name /opt/rtems-4.11/bin/lm32-rtems4.11-gcc
+CCC_ADD_ARGS := -ccc-clang-cxx,-Qunused-arguments,-std-default=gnu89,-ferror-limit=0,-fmessage-length=0,-fno-color-diagnostics,-fno-caret-diagnostics,-Wno-unused-value,-Wno-return-type,-Wno-constant-logical-operand,-fno-verbose-asm,-march=mico32,-ccc-host-triple mico32-elf,-ccc-gcc-name lm32-rtems4.11-gcc
 
 # args we need:
-# /Users/jpbonn/Documents/mico32/install2/bin/clang -march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name /opt/rtems-4.11/bin/lm32-rtems4.11-gcc -Tlinker.ld -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -O0 -DSTACK_SIZE=200 -DMAX_ITER=1000 crt.o main.c -o main.tst
+# /home/jpbonn/Documents/mico32/install2/bin/clang -march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -Tlinker.ld -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -O0 -DSTACK_SIZE=200 -DMAX_ITER=1000 crt.o main.c -o main.tst
 
-CFLAGS_FOR_CRT:=-march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name /opt/rtems-4.11/bin/lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir)
+CFLAGS_FOR_CRT:=-march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir)
 CFLAGS_FOR_TARGET:= $(CFLAGS_FOR_CRT) -lcrt
 
-LDFLAGS_FOR_TARGET:=-march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name /opt/rtems-4.11/bin/lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt
+LDFLAGS_FOR_TARGET:=-march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt
 
-CC_UNDER_TEST := /Users/jpbonn/Documents/mico32/install2/bin/clang
-CXX_UNDER_TEST := /Users/jpbonn/Documents/mico32/install2/bin/clang++
+CC_UNDER_TEST := /home/jpbonn/Documents/mico32/install/bin/clang
+CXX_UNDER_TEST := /home/jpbonn/Documents/mico32/install/bin/clang++
 ALT_CC_UNDER_TEST := lm32-rtems4.11-gcc
 ALT_CXX_UNDER_TEST := lm32-rtems4.11-g++
 COMPAT_OPTIONS := [list [list {-m64} {-m64}] [list {-m32} {-m32}]]
