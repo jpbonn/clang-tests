@@ -3,12 +3,13 @@
 rm -rf libcrt.a
 make -f Makefile.mico32 libcrt.a
 
-/var/nbbuild/bin/clang -march=mico32 -Xclang -target-feature -Xclang +nospbias -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite -lcrt -w -fnested-functions  -O0  -DSTACK_SIZE=200 -fno-show-column  -DMAX_ITER=1000 -O0 -emit-llvm -S t.c  -o t.0.ll
+/var/nbbuild/bin/clang -march=mico32 -Xclang -target-feature -Xclang +nospbias -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite -lcrt -w -fnested-functions  -O0  -DSTACK_SIZE=200 -fno-show-column  -DMAX_ITER=1000 -O0 -emit-llvm -S t.c  -o t.0.ll -g
 
-/var/nbbuild/bin/llc -O0 -march=mico32 -o t.0.s t.0.ll -disable-fp-elim
+/var/nbbuild/bin/llc -O0 -march=mico32 -o t.0.s t.0.ll -disable-fp-elim 
 
-/var/nbbuild/bin/clang -march=mico32 -Xclang -target-feature -Xclang +nospbias -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite -lcrt -w -fnested-functions  -O0  -DSTACK_SIZE=200 -fno-show-column  -DMAX_ITER=1000 -O0 t.0.s  -o t.0.exe
+/var/nbbuild/bin/clang -march=mico32 -Xclang -target-feature -Xclang +nospbias -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite -lcrt -w -fnested-functions  -O0  -DSTACK_SIZE=200 -fno-show-column  -DMAX_ITER=1000 -O0 t.0.s  -o t.0.exe -g
 
-/var/nbbuild/bin/clang -march=mico32 -Xclang -target-feature -Xclang +nospbias -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite -lcrt -w -fnested-functions  -O0  -DSTACK_SIZE=200 -fno-show-column  -DMAX_ITER=1000  t.c  -o t.exe
+/var/nbbuild/bin/clang -march=mico32 -Xclang -target-feature -Xclang +nospbias -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L/home/jpbonn/Documents/mico32/clang-tests/gcc-4_2-testsuite -lcrt -w -fnested-functions  -O0  -DSTACK_SIZE=200 -fno-show-column  -DMAX_ITER=1000  t.c  -o t.exe -g
 
 qemu-system-lm32 -M lm32-evr -nographic -device lm32-sys -net none -kernel t.0.exe
+
