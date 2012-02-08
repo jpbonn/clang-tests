@@ -340,7 +340,10 @@ if ![info exists TORTURE_OPTIONS] {
     # choose to disable inlining functions by default, even when optimizing.
     set TORTURE_OPTIONS [list \
         { -O0 } \
+        { -O0 -g } \
         { -O1 } \
+        { -O1 -g } \
         { -O2 } \
+        { -O2 -g } \
         { -O3 } ]
 }   
