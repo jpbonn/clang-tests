@@ -1,7 +1,7 @@
+  void foo (int a[2][N++]) {}
 void
 bar (int N)
 {
-  void foo (int a[2][N++]) {}
   int a[2][N];
   foo (a);
   int b[2][N];

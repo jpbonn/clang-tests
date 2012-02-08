@@ -2,13 +2,6 @@ extern int foo (int, int, int (*) (int, int, int, int, int, int, int));
 
 int z;
 
-int
-main (void)
-{
-#ifndef NO_TRAMPOLINES
-  int sum = 0;
-  int i;
-
   int nested (int a, int b, int c, int d, int e, int f, int g)
     {
       z = c + d + e + f + g;
@@ -18,6 +11,13 @@ main (void)
       else
         return b - a;
     }
+
+int
+main (void)
+{
+#ifndef NO_TRAMPOLINES
+  int sum = 0;
+  int i;
 
   for (i = 0; i < 10; ++i)
     {

@@ -36,6 +36,13 @@ ull gull;
   DO_TEST (t1, -2048)		\
   DO_TEST (t2, -513)		\
   DO_TEST (t3, -512)		\
+  DO_TEST (t4, -511)		
+
+/*
+#define DO_TESTS(DO_TEST)	\
+  DO_TEST (t1, -2048)		\
+  DO_TEST (t2, -513)		\
+  DO_TEST (t3, -512)		\
   DO_TEST (t4, -511)		\
   DO_TEST (t5, -1)		\
   DO_TEST (t6, 1)		\
@@ -44,6 +51,7 @@ ull gull;
   DO_TEST (t9, 513)		\
   DO_TEST (t10, gull)		\
   DO_TEST (t11, -gull)
+*/
 
 DO_TESTS (BUILD_TEST)
 

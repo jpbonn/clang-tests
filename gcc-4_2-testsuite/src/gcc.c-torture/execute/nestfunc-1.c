@@ -7,14 +7,15 @@ g (int a, int b, int (*gi) (int, int))
     return b;
 }
 
-f ()
-{
-#ifndef NO_TRAMPOLINES
-  int i, j;
   int f2 (int a, int b)
     {
       return a > b;
     }
+
+f ()
+{
+#ifndef NO_TRAMPOLINES
+  int i, j;
 
   if (g (1, 2, f2) != 2)
     abort ();

@@ -1,7 +1,5 @@
 #include <stdarg.h>
 
-main ()
-{
   double f (int x, ...)
     {
       va_list args;
@@ -13,6 +11,8 @@ main ()
       return a;
     }
 
+main ()
+{
   if (f (1, (double)1) != 1.0)
     abort ();
   exit (0);

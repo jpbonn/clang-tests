@@ -2,12 +2,7 @@
 extern long foo (long, long, long (*) (long, long));
 extern long use (long (*) (long, long), long, long);
 
-int
-main (void)
-{
-#ifndef NO_TRAMPOLINES
-  long sum = 0;
-  long i;
+long sum = 0;
 
   long nested_0 (long a, long b)
     {
@@ -26,6 +21,12 @@ main (void)
     {
       return nested_1 (b, a);
     }
+
+int
+main (void)
+{
+#ifndef NO_TRAMPOLINES
+  long i;
 
   for (i = 0; i < 10; ++i)
     {
