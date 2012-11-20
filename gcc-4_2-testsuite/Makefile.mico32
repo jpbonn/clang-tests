@@ -3,38 +3,36 @@
 # lm32-rtems4.11-gcc -T$board_dir/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -L$board_dir -lcrt z.c -o z.gcc.exe -L/opt/rtems-4.11/lib/gcc/lm32-rtems4.11/4.5.3 -lgcc
 #
 
-host := mico32-bare-elf
-build := mico32-bare-elf
-target := mico32-bare-elf
+host := lm32-bare-elf
+build := lm32-bare-elf
+target := lm32-bare-elf
 srcdir := $(shell pwd)/src
 objdir := $(shell pwd)/obj
 
-compiler_rt_dir := /home/jpbonn/Documents/mico32/compiler-rt/mico32/emb
+compiler_rt_dir := /home/jp/Documents/origin2/compiler-rt-lm32/lm32/emb/
 # use the clang compiled newlib
-NEWLIB_DIR=/home/jpbonn/Documents/mico32/newlib/build/install/lm32-elf
-NEWLIB_LIBDIR=/home/jpbonn/Documents/mico32/newlib/build/install/lm32-elf/lib
-LIBGLOSS_DIR=/home/jpbonn/Documents/mico32/newlib/build-libgloss/lm32
+NEWLIB_DIR=/home/jp/Documents/origin2/newlib/build/install/lm32-elf/
+NEWLIB_LIBDIR=/home/jp/Documents/origin2/newlib/build/install/lm32-elf/lib
+LIBGLOSS_DIR=/home/jp/Documents/origin2/newlib/build-libgloss/lm32
 board_dir := $(shell pwd)
 
-CCC_ADD_ARGS := -ccc-clang-cxx,-Qunused-arguments,-std-default=gnu89,-ferror-limit=0,-fmessage-length=0,-fno-color-diagnostics,-fno-caret-diagnostics,-Wno-unused-value,-Wno-return-type,-Wno-constant-logical-operand,-fno-verbose-asm,-march=mico32,-ccc-host-triple mico32-elf,-ccc-gcc-name lm32-rtems4.11-gcc
-CCC_ADD_ARGS := -ccc-clang-cxx,-Qunused-arguments,-std-default=gnu89,-ferror-limit=0,-fmessage-length=0,-fno-color-diagnostics,-fno-caret-diagnostics,-Wno-unused-value,-Wno-return-type,-Wno-constant-logical-operand,-fno-verbose-asm,-march=mico32,-Xclang -target-feature,-Xclang +nospbias,-ccc-host-triple mico32-elf,-ccc-gcc-name lm32-rtems4.11-gcc -L$(compiler_rt_dir) -lcompiler_rt 
+CCC_ADD_ARGS := -ccc-clang-cxx,-Qunused-arguments,-std-default=gnu89,-ferror-limit=0,-fmessage-length=0,-fno-color-diagnostics,-fno-caret-diagnostics,-Wno-unused-value,-Wno-return-type,-Wno-constant-logical-operand,-fno-verbose-asm,-march=lm32,-target lm32,-ccc-gcc-name lm32-rtems4.11-gcc
+CCC_ADD_ARGS := -ccc-clang-cxx,-Qunused-arguments,-std-default=gnu89,-ferror-limit=0,-fmessage-length=0,-fno-color-diagnostics,-fno-caret-diagnostics,-Wno-unused-value,-Wno-return-type,-Wno-constant-logical-operand,-fno-verbose-asm,-march=lm32,-Xclang -target-feature,-Xclang +nospbias,-target lm32,-ccc-gcc-name lm32-rtems4.11-gcc -L$(compiler_rt_dir) -lcompiler_rt 
 
 # args we need:
-# /home/jpbonn/Documents/mico32/install2/bin/clang -march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -Tlinker.ld -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -O0 -DSTACK_SIZE=200 -DMAX_ITER=1000 crt.o main.c -o main.tst
+# /home/jpbonn/Documents/lm32/install2/bin/clang -march=lm32 -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -Tlinker.ld -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -O0 -DSTACK_SIZE=200 -DMAX_ITER=1000 crt.o main.c -o main.tst
 
-CFLAGS_FOR_CRT:=-march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir)
-CFLAGS_FOR_CRT:=-march=mico32 -Xclang -target-feature -Xclang +nospbias -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nodefaultlibs -w -fnested-functions -L$(board_dir) -L$(compiler_rt_dir) -I$(NEWLIB_DIR)/include -L$(NEWLIB_LIBDIR) -L$(LIBGLOSS_DIR)
+CFLAGS_FOR_CRT:=-march=lm32 -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir)
+CFLAGS_FOR_CRT:=-march=lm32 -Xclang -target-feature -Xclang +nospbias -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nodefaultlibs -w -fnested-functions -L$(board_dir) -L$(compiler_rt_dir) -I$(NEWLIB_DIR)/include -L$(NEWLIB_LIBDIR) -L$(LIBGLOSS_DIR)
 CFLAGS_FOR_TARGET:= $(CFLAGS_FOR_CRT) -lcrt -lc -lm -lcompiler_rt -lgloss
 
-LDFLAGS_FOR_TARGET:=-march=mico32 -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt
-LDFLAGS_FOR_TARGET:=-march=mico32 -Xclang -target-feature -Xclang +nospbias -ccc-host-triple mico32-elf -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt -L$(compiler_rt_dir) -lcompiler_rt
+LDFLAGS_FOR_TARGET:=-march=lm32 -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt
+LDFLAGS_FOR_TARGET:=-march=lm32 -Xclang -target-feature -Xclang +nospbias -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt -L$(compiler_rt_dir) -lcompiler_rt
 
-#CC_UNDER_TEST := /home/jpbonn/Documents/mico32/install/bin/clang
-#CXX_UNDER_TEST := /home/jpbonn/Documents/mico32/install/bin/clang++
-CC_UNDER_TEST := /var/build/bin/clang
-CXX_UNDER_TEST := /var/build/bin/clang++
-CC_UNDER_TEST := /var/nbbuild/bin/clang
-CXX_UNDER_TEST := /var/nbbuild/bin/clang++
+#CC_UNDER_TEST := /home/jpbonn/Documents/lm32/install/bin/clang
+#CXX_UNDER_TEST := /home/jpbonn/Documents/lm32/install/bin/clang++
+CC_UNDER_TEST := /home/jp/Documents/origin2/build2/Debug+Asserts/bin/clang
+CXX_UNDER_TEST := /home/jp/Documents/origin2/build2/Debug+Asserts/bin/clang++
 CC_UNDER_TEST := clang
 CXX_UNDER_TEST := clang++
 ALT_CC_UNDER_TEST := lm32-rtems4.11-gcc
