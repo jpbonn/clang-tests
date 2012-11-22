@@ -17,17 +17,17 @@ LIBGLOSS_DIR=/home/jp/Documents/origin2/newlib/build-libgloss/lm32
 board_dir := $(shell pwd)
 
 CCC_ADD_ARGS := -ccc-clang-cxx,-Qunused-arguments,-std-default=gnu89,-ferror-limit=0,-fmessage-length=0,-fno-color-diagnostics,-fno-caret-diagnostics,-Wno-unused-value,-Wno-return-type,-Wno-constant-logical-operand,-fno-verbose-asm,-march=lm32,-target lm32,-ccc-gcc-name lm32-rtems4.11-gcc
-CCC_ADD_ARGS := -ccc-clang-cxx,-Qunused-arguments,-std-default=gnu89,-ferror-limit=0,-fmessage-length=0,-fno-color-diagnostics,-fno-caret-diagnostics,-Wno-unused-value,-Wno-return-type,-Wno-constant-logical-operand,-fno-verbose-asm,-march=lm32,-Xclang -target-feature,-Xclang +nospbias,-target lm32,-ccc-gcc-name lm32-rtems4.11-gcc -L$(compiler_rt_dir) -lcompiler_rt 
+CCC_ADD_ARGS := -ccc-clang-cxx,-Qunused-arguments,-std-default=gnu89,-ferror-limit=0,-fmessage-length=0,-fno-color-diagnostics,-fno-caret-diagnostics,-Wno-unused-value,-Wno-return-type,-Wno-constant-logical-operand,-fno-verbose-asm,-march=lm32,-target lm32,-ccc-gcc-name lm32-rtems4.11-gcc -L$(compiler_rt_dir) -lcompiler_rt 
 
 # args we need:
 # /home/jpbonn/Documents/lm32/install2/bin/clang -march=lm32 -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -Tlinker.ld -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -O0 -DSTACK_SIZE=200 -DMAX_ITER=1000 crt.o main.c -o main.tst
 
 CFLAGS_FOR_CRT:=-march=lm32 -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir)
-CFLAGS_FOR_CRT:=-march=lm32 -Xclang -target-feature -Xclang +nospbias -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nodefaultlibs -w -fnested-functions -L$(board_dir) -L$(compiler_rt_dir) -I$(NEWLIB_DIR)/include -L$(NEWLIB_LIBDIR) -L$(LIBGLOSS_DIR)
+CFLAGS_FOR_CRT:=-march=lm32 -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nodefaultlibs -w -fnested-functions -L$(board_dir) -L$(compiler_rt_dir) -I$(NEWLIB_DIR)/include -L$(NEWLIB_LIBDIR) -L$(LIBGLOSS_DIR)
 CFLAGS_FOR_TARGET:= $(CFLAGS_FOR_CRT) -lcrt -lc -lm -lcompiler_rt -lgloss
 
 LDFLAGS_FOR_TARGET:=-march=lm32 -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nostdinc -nostdlib -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt
-LDFLAGS_FOR_TARGET:=-march=lm32 -Xclang -target-feature -Xclang +nospbias -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt -L$(compiler_rt_dir) -lcompiler_rt
+LDFLAGS_FOR_TARGET:=-march=lm32 -target lm32 -ccc-gcc-name lm32-rtems4.11-gcc -T$(board_dir)/linker.ld -nostartfiles -nodefaultlibs -w -fnested-functions -L$(board_dir) -lcrt -L$(compiler_rt_dir) -lcompiler_rt
 
 #CC_UNDER_TEST := /home/jpbonn/Documents/lm32/install/bin/clang
 #CXX_UNDER_TEST := /home/jpbonn/Documents/lm32/install/bin/clang++
