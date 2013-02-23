@@ -14,3 +14,9 @@ sudo apt-get install dejagnu
 
 
 make -f Makefile.mico32 check-gcc
+
+
+To test with Musl C library:
+
+cp musl.ld linker.ld
+make -f Makefile.musl
