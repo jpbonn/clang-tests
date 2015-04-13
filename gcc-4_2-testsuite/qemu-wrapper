@@ -2,7 +2,7 @@
 set -o errexit
 set -o nounset
 
-SIM=qemu-system-lm32
+SIM=/opt/local/bin/qemu-system-lm32
 
 function on_exit ()
 {
