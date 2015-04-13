@@ -1,36 +1,41 @@
 
+.equ MAX_TESTNAME_LEN, 32
 .macro test_name name
 	.data
 tn_\name:
-	.asciz "\name"
+	.ascii "\name"
+	.space MAX_TESTNAME_LEN - (. - tn_\name), ' '
 	.text
-	mvhi r13, hi(tn_\name)
-	ori r13, r13, lo(tn_\name)
-	mvhi r12, hi(0xffff0000)      # base address of test block
-	ori r12, r12, lo(0xffff0000)
-	sw (r12+8), r13
+	.global \name
+\name:
+	addi sp, sp, -12
+	sw (sp+4), r1
+	sw (sp+8), r2
+	sw (sp+12), r3
+	mvi r1, 1
+	mvhi r2, hi(tn_\name)
+	ori r2, r2, lo(tn_\name)
+	mvi r3, MAX_TESTNAME_LEN
+	calli _write
+	lw r3, (sp+12)
+	lw r2, (sp+8)
+	lw r1, (sp+4)
+	addi sp, sp, 12
 .endm
 
 .macro tc_pass
-	mvi r13, 0
-	mvhi r12, hi(0xffff0000)      # base address of test block
-	ori r12, r12, lo(0xffff0000)
-	sw (r12+4), r13
+	mvi r12, 0
+	calli _tc_pass
 .endm
 
 .macro tc_fail
-	mvi r13, 1
-	mvhi r12, hi(0xffff0000)      # base address of test block
-	ori r12, r12, lo(0xffff0000)
-	sw (r12+4), r13
+	addi r12, r12, 1
+	calli _tc_fail
 .endm
 
 .macro end
-	mvhi r12, hi(0xffff0000)      # base address of test block
-	ori r12, r12, lo(0xffff0000)
-	sw (r12+0), r0                # stop qemu
-1:
-	bi 1b
+	mv r1, r12
+	calli _exit
 .endm
 
 # base +

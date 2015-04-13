@@ -54,4 +54,5 @@ SECTIONS
 }
 
 PROVIDE(_fstack = ORIGIN(ram) + LENGTH(ram) - 4);
+PROVIDE(end = _end);
 
