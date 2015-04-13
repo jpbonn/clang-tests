@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 g (x, y)
 {
   if (x != 3)

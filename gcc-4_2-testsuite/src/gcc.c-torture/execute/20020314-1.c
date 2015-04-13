@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 void f(void * a, double y)
 {
 }

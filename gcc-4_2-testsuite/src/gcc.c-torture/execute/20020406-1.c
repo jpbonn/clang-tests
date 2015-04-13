@@ -1,5 +1,6 @@
 // Origin: abbott@dima.unige.it
 // PR c/5120
+#include <stdlib.h>
 
 extern void * malloc (__SIZE_TYPE__);
 extern void * calloc (__SIZE_TYPE__, __SIZE_TYPE__);

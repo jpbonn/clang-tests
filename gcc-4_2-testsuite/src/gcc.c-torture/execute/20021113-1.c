@@ -1,5 +1,6 @@
 /* This program tests a data flow bug that would cause constant propagation
    to propagate constants through function calls.  */
+#include <stdlib.h>
 
 foo (int *p)
 {
