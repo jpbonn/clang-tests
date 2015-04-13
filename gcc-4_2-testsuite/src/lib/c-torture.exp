@@ -162,7 +162,8 @@ proc c-torture-execute { sources args } {
 
 	set options ""
 	# APPLE LOCAL testsuite nested functions
-	lappend options "additional_flags=-w -fnested-functions $option"
+	#lappend options "additional_flags=-w -fnested-functions $option"
+	lappend options "additional_flags=-w $option"
 	if { $additional_flags != "" } {
 	    lappend options "additional_flags=$additional_flags"
 	}
