@@ -13,7 +13,7 @@ bar (int x)
 
 char buf[10];
 
-inline char *
+static inline char *
 foo (char *tmp)
 {
   asm ("" : "=r" (tmp) : "0" (tmp));
